@@ -6,20 +6,21 @@ jobs:
   run:
     runs-on: windows-latest
     steps:
-      - name: 安装 ToDesk
+      - name: 下载并安装 ToDesk
         run: |
-          # 下载 ToDesk 安装包
-          Invoke-WebRequest -Uri "https://dl.todesk.com/windows/ToDesk_Lite.exe" -OutFile "ToDesk_Lite.exe"
-          # 静默安装
-          Start-Process .\ToDesk_Lite.exe -ArgumentList "/install /silent" -Wait
-          Start-Sleep 15
+          # 使用国内镜像下载，提高成功率
+          $url = "https://download.todesk.com/windows/ToDesk_Lite.exe"
+          $outFile = "$env:TEMP\ToDesk_Lite.exe"
+          Invoke-WebRequest -Uri $url -OutFile $outFile -UseBasicParsing
+          Start-Process $outFile -ArgumentList "/install /silent" -Wait
+          Start-Sleep 20
 
-      - name: 输出连接信息（关键）
+      - name: 输出设备码与密码
         run: |
-          # 读取设备码和密码
-          $todeskPath = "C:\Program Files\ToDesk\ToDesk.exe"
-          & $todeskPath --get-device-id
-          & $todeskPath --get-password
-          # 保持任务运行，机器不销毁
+          $todesk = "C:\Program Files\ToDesk\ToDesk.exe"
+          Write-Host "=== 远程设备码 ==="
+          & $todesk --get-device-id
+          Write-Host "=== 临时连接密码 ==="
+          & $todesk --get-password
+          # 保持机器常驻
           while($true) { Start-Sleep 60 }
-
