@@ -10,12 +10,25 @@ jobs:
         run: |
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-      - name: 下载并启动网页版远程桌面
+      - name: 下载noVNC
         run: |
           Invoke-WebRequest -Uri "https://github.com/novnc/noVNC/archive/refs/heads/master.zip" -OutFile novnc.zip
           Expand-Archive novnc.zip -DestinationPath .
-          cd noVNC-master
-          Start-Process python -ArgumentList "websockify.py --web . 8080 localhost:3389" -WindowStyle Hidden
-      - name: 输出本地访问地址
+      - name: 下载Ngrok
         run: |
-          Write-Host "本地网页地址：http://localhost:8080/vnc.html"
+          Invoke-WebRequest -OutFile ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip
+          Expand-Archive ngrok.zip
+      - name: 启动穿透+网页服务
+        env:
+          NGROK_AUTH: ${{ secrets.NGROK_AUTH }}
+        run: |
+          cd ngrok
+          ./ngrok.exe authtoken $env:NGROK_AUTH
+          Start-Process ./ngrok.exe -ArgumentList "http 8080 --region hk" -WindowStyle Hidden
+          cd ../noVNC-master
+          Start-Process python -ArgumentList "websockify.py --web . 8080 localhost:3389" -WindowStyle Hidden
+          Start-Sleep 30
+      - name: 获取公网访问地址
+        run: |
+          $tunnels = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels"
+          Write-Host "✅ 手机访问地址：$($tunnels.tunnels[0].public_url)/vnc.html"
