@@ -32,10 +32,11 @@ jobs:
           Start-Process python -ArgumentList "websockify.py --web . 8080 localhost:3389" -WindowStyle Hidden
           Start-Sleep 45
 
-      - name: 等待接口就绪并获取完整公网链接
+      - name: 等待接口就绪并打印完整链接
         run: |
-          Start-Sleep 10
+          Start-Sleep 15
           $resp = Invoke-WebRequest "http://localhost:4040/api/tunnels"
-          $jsonObj = $resp.Content | ConvertFrom-Json
-          $fullUrl = $jsonObj.tunnels[0].public_url
-          Write-Host "✅ 手机访问完整地址：$fullUrl/vnc.html"
+          $data = $resp.Content | ConvertFrom-Json
+          $url = $data.tunnels[0].public_url
+          Write-Host "=== 手机访问地址 ==="
+          Write-Host "$url/vnc.html"
