@@ -11,17 +11,17 @@ jobs:
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: 从 GitHub 下载并静默安装 Tailscale
+      - name: GitHub 直链安装 Tailscale
         run: |
           Invoke-WebRequest -Uri "https://github.com/tailscale/tailscale/releases/latest/download/tailscale-setup.exe" -OutFile tailscale-setup.exe
           .\tailscale-setup.exe /install /quiet /norestart
           Start-Sleep 15
 
-      - name: 启动 Tailscale 加入网络
+      - name: 启动组网
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" up
           Start-Sleep 30
 
-      - name: 输出连接IP
+      - name: 打印IP
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" ip -4
