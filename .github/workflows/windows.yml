@@ -1,0 +1,14 @@
+name: Windows Free RDP
+on: workflow_dispatch:
+
+jobs:
+  win:
+    runs-on: windows-latest
+    steps:
+      - name: Enable RDP
+        run: |
+          Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+      - name: Show IP
+        run: |
+          (Get-NetIPAddress | Where-Object {$_.AddressFamily -eq 'IPv4' -and $_.InterfaceAlias -notlike 'Loopback*'}).IPAddress
