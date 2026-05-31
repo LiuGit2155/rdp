@@ -30,11 +30,12 @@ jobs:
           Start-Process ./ngrok.exe -ArgumentList "http 8080 --region hk" -WindowStyle Hidden
           cd ../noVNC-master
           Start-Process python -ArgumentList "websockify.py --web . 8080 localhost:3389" -WindowStyle Hidden
-          Start-Sleep 35
+          Start-Sleep 45
 
-      - name: 获取并打印完整公网地址（兼容修复版）
+      - name: 等待接口就绪并获取完整公网链接
         run: |
+          Start-Sleep 10
           $resp = Invoke-WebRequest "http://localhost:4040/api/tunnels"
-          $json = $resp.Content | ConvertFrom-Json
-          $url = $json.tunnels[0].public_url
-          Write-Host "✅ 手机访问完整链接：$url/vnc.html"
+          $jsonObj = $resp.Content | ConvertFrom-Json
+          $fullUrl = $jsonObj.tunnels[0].public_url
+          Write-Host "✅ 手机访问完整地址：$fullUrl/vnc.html"
