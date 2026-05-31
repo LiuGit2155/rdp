@@ -1,4 +1,4 @@
-name: Windows RDP
+name: Windows Web Desktop
 on:
   workflow_dispatch:
 
@@ -6,10 +6,15 @@ jobs:
   run:
     runs-on: windows-latest
     steps:
-      - name: Enable RDP
+      - name: 开启远程桌面
         run: |
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-      - name: Show IP
+      - name: 安装NoVNC网页桌面
         run: |
-          (Get-NetIPAddress | Where-Object {$_.AddressFamily -eq 'IPv4' -and $_.InterfaceAlias -notlike 'Loopback*'}).IPAddress
+          winget install turbovnc.TurboVNC
+          winget install novnc.noVNC
+          Start-Process "C:\Program Files\noVNC\run.bat" -ArgumentList "--listen 8080" -Wait
+      - name: 输出访问地址
+        run: |
+          Write-Host "访问地址：http://localhost:8080/vnc.html"
