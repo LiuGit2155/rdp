@@ -6,21 +6,17 @@ jobs:
   run:
     runs-on: windows-latest
     steps:
-      - name: 下载并安装 ToDesk
+      - name: 使用 winget 静默安装 ToDesk
         run: |
-          # 使用国内镜像下载，提高成功率
-          $url = "https://download.todesk.com/windows/ToDesk_Lite.exe"
-          $outFile = "$env:TEMP\ToDesk_Lite.exe"
-          Invoke-WebRequest -Uri $url -OutFile $outFile -UseBasicParsing
-          Start-Process $outFile -ArgumentList "/install /silent" -Wait
+          winget install ToDesk.ToDeskLite --accept-source-agreements --accept-package-agreements
           Start-Sleep 20
 
-      - name: 输出设备码与密码
+      - name: 输出设备码与临时密码
         run: |
           $todesk = "C:\Program Files\ToDesk\ToDesk.exe"
           Write-Host "=== 远程设备码 ==="
           & $todesk --get-device-id
           Write-Host "=== 临时连接密码 ==="
           & $todesk --get-password
-          # 保持机器常驻
+          # 保持机器在线不销毁
           while($true) { Start-Sleep 60 }
