@@ -1,4 +1,4 @@
-name: Windows Web Desktop
+name: Windows Tailscale RDP
 on:
   workflow_dispatch:
 
@@ -11,32 +11,11 @@ jobs:
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: 下载noVNC网页桌面
+      - name: 安装并启动 Tailscale
         run: |
-          Invoke-WebRequest -Uri "https://github.com/novnc/noVNC/archive/refs/heads/master.zip" -OutFile novnc.zip
-          Expand-Archive novnc.zip -DestinationPath .
+          winget install Tailscale.Tailscale
+          Start-Process "C:\Program Files\Tailscale\tailscale.exe" -ArgumentList "up" -Wait
 
-      - name: 下载Ngrok穿透工具
+      - name: 输出虚拟机IP
         run: |
-          Invoke-WebRequest -OutFile ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip
-          Expand-Archive ngrok.zip
-
-      - name: 启动Ngrok+noVNC服务
-        env:
-          NGROK_AUTH: ${{ secrets.NGROK_AUTH }}
-        run: |
-          cd ngrok
-          ./ngrok.exe authtoken $env:NGROK_AUTH
-          Start-Process ./ngrok.exe -ArgumentList "http 8080 --region hk" -WindowStyle Hidden
-          cd ../noVNC-master
-          Start-Process python -ArgumentList "websockify.py --web . 8080 localhost:3389" -WindowStyle Hidden
-          Start-Sleep 45
-
-      - name: 等待接口就绪并打印完整链接
-        run: |
-          Start-Sleep 15
-          $resp = Invoke-WebRequest "http://localhost:4040/api/tunnels"
-          $data = $resp.Content | ConvertFrom-Json
-          $url = $data.tunnels[0].public_url
-          Write-Host "=== 手机访问地址 ==="
-          Write-Host "$url/vnc.html"
+          tailscale ip -4
