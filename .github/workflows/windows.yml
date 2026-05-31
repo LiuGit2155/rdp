@@ -21,11 +21,11 @@ jobs:
           winget install Tailscale.Tailscale --accept-source-agreements --accept-package-agreements
           Start-Sleep 10
 
-      - name: 启动 Tailscale 等待授权
+      - name: 启动Tailscale 等待授权（2分钟）
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" up
-          Start-Sleep 30
+          Start-Sleep 120
 
-      - name: 输出 IP
+      - name: 输出连接IP
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" ip -4
