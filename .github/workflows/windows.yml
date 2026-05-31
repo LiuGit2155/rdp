@@ -10,11 +10,12 @@ jobs:
         run: |
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-      - name: 安装NoVNC网页桌面
+      - name: 下载并启动网页版远程桌面
         run: |
-          winget install turbovnc.TurboVNC
-          winget install novnc.noVNC
-          Start-Process "C:\Program Files\noVNC\run.bat" -ArgumentList "--listen 8080" -Wait
-      - name: 输出访问地址
+          Invoke-WebRequest -Uri "https://github.com/novnc/noVNC/archive/refs/heads/master.zip" -OutFile novnc.zip
+          Expand-Archive novnc.zip -DestinationPath .
+          cd noVNC-master
+          Start-Process python -ArgumentList "websockify.py --web . 8080 localhost:3389" -WindowStyle Hidden
+      - name: 输出本地访问地址
         run: |
-          Write-Host "访问地址：http://localhost:8080/vnc.html"
+          Write-Host "本地网页地址：http://localhost:8080/vnc.html"
