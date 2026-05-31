@@ -11,17 +11,16 @@ jobs:
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: 使用镜像下载 Tailscale
+      - name: 安装 Tailscale（自动同意协议）
         run: |
-          Invoke-WebRequest -Uri "https://mirror.ghproxy.com/https://github.com/tailscale/tailscale/releases/latest/download/tailscale-setup.exe" -OutFile tailscale-setup.exe
-          .\tailscale-setup.exe /install /quiet /norestart
-          Start-Sleep 15
+          winget install Tailscale.Tailscale --accept-source-agreements --accept-package-agreements
+          Start-Sleep 10
 
-      - name: 启动组网
+      - name: 启动并等待授权
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" up
           Start-Sleep 30
 
-      - name: 输出IP
+      - name: 输出连接IP
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" ip -4
