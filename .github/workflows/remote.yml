@@ -1,0 +1,25 @@
+name: Windows ToDesk 云电脑
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: windows-latest
+    steps:
+      - name: 安装 ToDesk
+        run: |
+          # 下载 ToDesk 安装包
+          Invoke-WebRequest -Uri "https://dl.todesk.com/windows/ToDesk_Lite.exe" -OutFile "ToDesk_Lite.exe"
+          # 静默安装
+          Start-Process .\ToDesk_Lite.exe -ArgumentList "/install /silent" -Wait
+          Start-Sleep 15
+
+      - name: 输出连接信息（关键）
+        run: |
+          # 读取设备码和密码
+          $todeskPath = "C:\Program Files\ToDesk\ToDesk.exe"
+          & $todeskPath --get-device-id
+          & $todeskPath --get-password
+          # 保持任务运行，机器不销毁
+          while($true) { Start-Sleep 60 }
+
