@@ -11,21 +11,17 @@ jobs:
           Set-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: 重置 runneradmin 密码
+      - name: 重置远程登录密码
         run: |
           $newPwd = ConvertTo-SecureString "123456Aa!" -AsPlainText -Force
           Set-LocalUser -Name runneradmin -Password $newPwd
 
-      - name: 安装 Tailscale
+      - name: 安装Tailscale
         run: |
           winget install Tailscale.Tailscale --accept-source-agreements --accept-package-agreements
           Start-Sleep 10
 
-      - name: 启动Tailscale 等待授权（2分钟）
+      - name: 启动Tailscale并保持机器在线
         run: |
           & "C:\Program Files\Tailscale\tailscale.exe" up
-          Start-Sleep 120
-
-      - name: 输出连接IP
-        run: |
-          & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+          while($true) { Start-Sleep 60 }
